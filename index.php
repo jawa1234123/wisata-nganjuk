@@ -1,9 +1,16 @@
 <?php
 include 'config.php';
+include 'Repository.php'; // Memanggil class Repository
 
-$wisata = mysqli_query($conn,"SELECT * FROM wisata ORDER BY id DESC LIMIT 8");
-$kuliner = mysqli_query($conn,"SELECT * FROM kuliner ORDER BY id DESC LIMIT 8");
-$event   = mysqli_query($conn,"SELECT * FROM event ORDER BY id DESC LIMIT 8");
+// Menerapkan Dependency Injection
+$wisataRepo = new WisataRepository($conn);
+$kulinerRepo = new KulinerRepository($conn);
+$eventRepo = new EventRepository($conn);
+
+// Mengambil data yang sudah berformat seragam
+$dataWisata = $wisataRepo->getLatestData(8);
+$dataKuliner = $kulinerRepo->getLatestData(8);
+$dataEvent = $eventRepo->getLatestData(8);
 ?>
 
 <!DOCTYPE html>
@@ -232,7 +239,8 @@ body{
     </div>
 </section>
 
-<?php function sliderSection($title,$data,$id,$type){ ?>
+<!-- FUNGSI SLIDER YANG SUDAH DIREFACTOR (TIDAK ADA LAGI TERNARY CHECK) -->
+<?php function sliderSection($title, $dataArray, $id, $type){ ?>
 <section class="section section-<?= $type ?>">
     <div class="section-header">
         <h2><?= $title ?></h2>
@@ -245,14 +253,13 @@ body{
 
     <div class="slider-wrapper">
         <div class="slider" id="<?= $id ?>">
-        <?php while($d=mysqli_fetch_assoc($data)){ ?>
+        <!-- Menggunakan foreach karena data sudah berupa array dari Repository -->
+        <?php foreach($dataArray as $d){ ?>
             <a href="detail_<?= $type ?>.php?id=<?= $d['id'] ?>" class="card">
                 <img src="assets/img/<?= $d['gambar'] ?>" onerror="this.src='assets/img/default.jpg'">
                 <div class="card-content">
-                    <h5>
-                        <?= $type=='kuliner' ? $d['nama_kuliner'] : ($type=='event' ? $d['judul'] : $d['nama']) ?>
-                    </h5>
-                    <p><?= substr($d['lokasi'] ?? $d['deskripsi'],0,60) ?>...</p>
+                    <h5><?= $d['judul'] ?></h5>
+                    <p><?= substr($d['deskripsi'],0,60) ?>...</p>
                 </div>
             </a>
         <?php } ?>
@@ -262,9 +269,10 @@ body{
 <?php } ?>
 
 <?php
-sliderSection("Destinasi Unggulan",$wisata,"wisata","wisata");
-sliderSection("Kuliner Khas",$kuliner,"kuliner","kuliner");
-sliderSection("Event Nganjuk",$event,"event","event");
+// Menjalankan fungsi rendering HTML
+sliderSection("Destinasi Unggulan", $dataWisata, "wisata", "wisata");
+sliderSection("Kuliner Khas", $dataKuliner, "kuliner", "kuliner");
+sliderSection("Event Nganjuk", $dataEvent, "event", "event");
 ?>
 
 <script>
