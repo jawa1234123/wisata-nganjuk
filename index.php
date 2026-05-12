@@ -242,17 +242,16 @@ body{
             <button onclick="slideRight('<?= $id ?>')">›</button>
         </div>
     </div>
-
     <div class="slider-wrapper">
         <div class="slider" id="<?= $id ?>">
-        <?php while($d=mysqli_fetch_assoc($data)){ ?>
-            <a href="detail_<?= $type ?>.php?id=<?= $d['id'] ?>" class="card">
-                <img src="assets/img/<?= $d['gambar'] ?>" onerror="this.src='assets/img/default.jpg'">
+        <?php foreach($items as $item){ ?>
+            <a href="detail_<?= $item->getType() ?>.php?id=<?= $item->getId() ?>" class="card">
+                <img src="assets/img/<?= $item->getImageUrl() ?>" onerror="this.src='assets/img/default.jpg'">
                 <div class="card-content">
                     <h5>
-                        <?= $type=='kuliner' ? $d['nama_kuliner'] : ($type=='event' ? $d['judul'] : $d['nama']) ?>
+                        <?= htmlspecialchars($item->getTitle()) ?>
                     </h5>
-                    <p><?= substr($d['lokasi'] ?? $d['deskripsi'],0,60) ?>...</p>
+                    <p><?= htmlspecialchars(substr($item->getDescription(), 0, 60)) ?>...</p>
                 </div>
             </a>
         <?php } ?>
