@@ -1,0 +1,18 @@
+{
+    "name": "wisata-nganjuk/unit-test",
+    "description": "Unit Test untuk aplikasi Wisata Nganjuk",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    }
+}
