@@ -113,4 +113,43 @@ class UserService
         $result = $this->db->query("SELECT * FROM users WHERE email='$escapedEmail'");
         return $this->db->fetchAssoc($result);
     }
+
+    /**
+     * Reset password pengguna (Forgot Password)
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function resetPassword(string $email, string $newPassword, string $confirmPassword): array
+    {
+        if (empty($email) || empty($newPassword) || empty($confirmPassword)) {
+            return ['success' => false, 'message' => 'Semua field wajib diisi'];
+        }
+
+        if (!$this->isValidEmail($email)) {
+            return ['success' => false, 'message' => 'Format email tidak valid'];
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            return ['success' => false, 'message' => 'Konfirmasi password tidak cocok'];
+        }
+
+        if (!$this->isValidPassword($newPassword)) {
+            return ['success' => false, 'message' => 'Password baru minimal 6 karakter'];
+        }
+
+        $user = $this->findByEmail($email);
+        if (!$user) {
+            return ['success' => false, 'message' => 'Email tidak terdaftar'];
+        }
+
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $escapedEmail   = $this->db->escapeString($email);
+        $escapedPwd     = $this->db->escapeString($hashedPassword);
+
+        $update = $this->db->query("UPDATE users SET password='$escapedPwd' WHERE email='$escapedEmail'");
+        if ($update) {
+            return ['success' => true, 'message' => 'Password berhasil diubah'];
+        }
+
+        return ['success' => false, 'message' => 'Gagal mengubah password'];
+    }
 }
